@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Transcript Summarizer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1em;
+        }
+
+        #summary {
+            white-space: pre-wrap;
+        }
+
+        #video-title {
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>YouTube Transcript Summarizer</h1>
+    <form id="summarize-form">
+        <label for="video-url">YouTube Video URL:</label>
+        <input type="url" id="video-url" required>
+        <button type="submit">Summarize</button>
+    </form>
+
+    <h3 id="video-title"></h3>
+    <pre id="summary"></pre>
+
+    <script>
+        document.getElementById("summarize-form").addEventListener("submit", async (event) => {
+            event.preventDefault();
+
+            const videoUrl = document.getElementById("video-url").value;
+            const response = await fetch("/get_summary", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ url: videoUrl })
+            });
+
+            const data = await response.json();
+            document.getElementById("video-title").textContent = data.title;
+            document.getElementById("summary").textContent = data.summary || data.error;
+        });
+    </script>
+</body>
+
+</html>
