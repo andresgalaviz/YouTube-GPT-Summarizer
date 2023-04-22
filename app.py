@@ -17,10 +17,15 @@ def extract_video_id(url):
     return None
 
 
-def get_video_title(video_id):
+def get_video_title(video_id) -> str | None:
     try:
-        yt = YouTube(f"https://www.youtube.com/watch?v={video_id}")
-        return yt.title
+        yt = YouTube(
+            f"https://www.youtube.com/watch?v={video_id}",
+            allow_oauth_cache=True,
+        )
+        vid_info = yt.vid_info
+        title = yt.title
+        return title
     except Exception as e:
         print(e)
         return None
@@ -30,13 +35,15 @@ def split_transcript(transcript_text, max_tokens=4000):
     words = transcript_text.split()
     chunks = []
     chunk = []
-
+    chunk_size = 0
     for word in words:
-        if len(chunk) + len(word) + 1 > max_tokens:
+        if chunk_size + len(word) >= max_tokens:
             chunks.append(chunk)
             chunk = []
+            chunk_size = 0
 
         chunk.append(word)
+        chunk_size += len(word)
 
     if chunk:
         chunks.append(chunk)
@@ -56,6 +63,7 @@ def summarize_chunks(title, chunks):
 
 
 def summarize_transcript(title, transcript_text):
+    print("Summarizing transcript...")
     prompt = f"Transcript from video titled {title}: {transcript_text}"
 
     response = openai.ChatCompletion.create(
@@ -98,4 +106,4 @@ def index():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=False)
